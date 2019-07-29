@@ -1,0 +1,25 @@
+{
+  "name": "streamy",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev:elm": "elm-live src/main.elm --hot --no-server -- --output=elm.js",
+    "dev:app": "parcel main.html",
+    "dev": "npm run dev:elm & npm run dev:app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nighca/streamy.git"
+  },
+  "author": "nighca@live.cn",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nighca/streamy/issues"
+  },
+  "homepage": "https://github.com/nighca/streamy#readme",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.3"
+  }
+}

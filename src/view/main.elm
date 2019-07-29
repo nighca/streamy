@@ -12,11 +12,11 @@ view : Model.Model -> Html.Html Update.Msg
 view model =
   Html.div [ Attr.class "view-index" ]
     [ Html.div
-      [ Attr.class "editor-wrapprt" ]
+      [ Attr.class "editor-wrapper" ]
       [ Html.h3 [] [ Html.text "Editor" ]
       , Editor.view model.script ]
     , Html.div
-      [ Attr.class "canvas-wrapprt" ]
+      [ Attr.class "canvas-wrapper" ]
       [ Html.h3 [] [ Html.text "Canvas" ]
-      , Canvas.view model.script ]
+      , Canvas.view model.parsed ]
     ]

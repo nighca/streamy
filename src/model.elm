@@ -1,10 +1,8 @@
-module Model exposing (Model, init)
+module Model exposing (Model)
+
+import Lang.Tree as Tree
 
 type alias Model =
   { script: String
-  }
-
-init : Model
-init =
-  { script = "inited"
+  , parsed: Maybe Tree.Tree
   }

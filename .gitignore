@@ -4,3 +4,5 @@ elm-stuff
 repl-temp-*
 # javascript stuff
 node_modules
+.cache
+dist
