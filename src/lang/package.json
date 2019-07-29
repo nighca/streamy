@@ -1,0 +1,22 @@
+{
+  "name": "streamy-lang",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "parser:gen": "nearleyc grammer.ne -o grammer.js",
+    "parser:test": "cat case.streamy | nearley-test grammer.js",
+    "test": "npm run parser:gen && npm run parser:test"
+  },
+  "author": "nighca@live.cn",
+  "license": "ISC",
+  "devDependencies": {
+    "nearley": "^2.17.0"
+  },
+  "engines": {
+    "node": "^12.0.0"
+  },
+  "dependencies": {
+    "elm-live": "^4.0.0-alpha.3"
+  }
+}
