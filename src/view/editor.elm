@@ -16,5 +16,4 @@ view script =
       , Events.onInput Update.ScriptInput
       ]
       []
-    , Html.p [] [ Html.text "xxx" ]
     ]

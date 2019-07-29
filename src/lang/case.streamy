@@ -1,26 +1,26 @@
-开始;
+Start up;
 
-// 准备任务
-switch (任务类型) {
-  case 简单:
-    什么都不做;
-  case 复杂:
-    准备 1;
-    准备 2;
-  case 其他:
-    炸;
+// prepare
+switch (Task type) {
+  case Easy:
+    Do nothing;
+  case Complex:
+    Prepare 1;
+    Prepare 2;
+  case Unknown:
+    Panic;
 }
 
-// 执行任务
-while (任务未完成) {
-  执行任务;
+// process
+while (Task not finished) {
+  Process task;
 }
 
-// 测试
-if (测试 OK) {
-  输出：成功;
+// Test
+if (Test OK?) {
+  Output success;
 } else {
-  输出：失败;
+  Output failure;
 }
 
-结束;
+End;
