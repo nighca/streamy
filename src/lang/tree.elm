@@ -1,39 +1,40 @@
-module Lang.Tree exposing (Tree, extractTree)
+module Lang.Tree exposing (..)
 
 import Json.Decode as D
 
-type alias Tree =
+type alias Error = String
+
+type alias Node =
   { type_ : String
-  , statements : List Statement
+  , value : Maybe String
+  , children : Maybe Children
   }
 
-extractTree : D.Value -> Tree
+type alias Tree = Node
+
+type Children = Children (List Node)
+
+decodeNode : D.Decoder Node
+decodeNode =
+  D.map3 Node
+    (D.field "type" D.string)
+    (D.maybe (D.field "value" D.string))
+    (D.maybe (D.field "children" (D.map Children (D.list (D.lazy (\_ -> decodeNode))))))
+
+decodeTree = decodeNode
+
+extractTree : D.Value -> Result Error Tree
 extractTree value =
-  { type = ""
-    , statements =
-    [ TextStatement "test"
-    ]
-  }
+  Result.mapError
+    (D.errorToString)
+    (D.decodeValue decodeTree value)
 
--- extractStatements : 
-
-type Statement =
-  TextStatement String
-  -- | BlockStatement
-
--- extractStatement : D.Value -> Statement
--- extractStatement parsed =
---   TextStatement parsed.
-
--- type alias BlockStatement =
---   { typ : String
---   , block : Block
---   }
-
--- type alias Block =
---   WhileBlock
---   | IfBlock
---   | IfElseBlock
---   | SwitchBlock
-
--- type alias 
+getChildrenNodes : Maybe Children -> List Node
+getChildrenNodes maybeChildren =
+  case maybeChildren of
+    Nothing ->
+      []
+    Just children ->
+      case children of
+        Children nodes ->
+          nodes

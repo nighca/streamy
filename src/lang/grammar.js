@@ -18,50 +18,58 @@ const lexer = moo.compile({
   word: /[^\s\(\)\{\}\:\;]+/
 })
 
+const meaningful = item => item != null
+
 const extractMain = arr => ({
   type: 'main',
-  statements: arr[1]
+  children: arr[1]
+})
+
+const extractStatements = arr => ({
+  type: 'statements',
+  children: arr.filter(meaningful)
+})
+
+const appendStatements = arr => ({
+  type: 'statements',
+  children: [...arr[0].children, arr[2]].filter(meaningful)
 })
 
 const extractTextStatement = arr => ({
   type: 'textStatement',
-  text: arr[0]
+  value: arr[0]
 })
 
-const extractBlockStatement = arr => ({
-  type: 'blockStatement',
-  block: arr[0]
+const extractBlockStatement = arr => arr[0]
+
+const extractWhileStatement = arr => ({
+  type: 'whileStatement',
+  value: arr[4],
+  children: [arr[10]]
 })
 
-const extractWhileBlock = arr => ({
-  type: 'whileBlock',
-  checkText: arr[4],
-  body: arr[10]
+const extractIfStatement = arr => ({
+  type: 'ifStatement',
+  value: arr[4],
+  children: [arr[10]]
 })
 
-const extractIfBlock = arr => ({
-  type: 'ifBlock',
-  checkText: arr[4],
-  body: arr[10]
+const extractIfElseStatement = arr => ({
+  type: 'ifElseStatement',
+  value: arr[4],
+  children: [arr[10], arr[18]]
 })
 
-const extractIfElseBlock = arr => ({
-  type: 'ifElseBlock',
-  checkText: arr[4],
-  trueBody: arr[10],
-  elseBody: arr[18]
+const extractSwitchStatement = arr => ({
+  type: 'switchStatement',
+  value: arr[4],
+  children: arr[10]
 })
 
-const extractSwitchBlock = arr => ({
-  type: 'switchBlock',
-  checkText: arr[4],
-  cases: arr[10]
-})
-
-const extractCaseBlock = arr => ({
-  type: 'caseBlock',
-  checkText: arr[2],
-  statements: arr[6]
+const extractCaseStatement = arr => ({
+  type: 'caseStatement',
+  value: arr[2],
+  children: [arr[6]]
 })
 
 const nuller = () => null
@@ -71,28 +79,26 @@ var grammar = {
     Lexer: lexer,
     ParserRules: [
     {"name": "main", "symbols": ["_", "statements", "_"], "postprocess": extractMain},
-    {"name": "statements", "symbols": ["statement"]},
-    {"name": "statements", "symbols": ["statements", "_", "statement"], "postprocess": appendItem(0, 2)},
+    {"name": "statements", "symbols": ["statement"], "postprocess": extractStatements},
+    {"name": "statements", "symbols": ["statements", "_", "statement"], "postprocess": appendStatements},
     {"name": "statement", "symbols": ["textStatement"], "postprocess": id},
-    {"name": "statement", "symbols": ["blockStatement"], "postprocess": id},
+    {"name": "statement", "symbols": ["whileStatement"], "postprocess": id},
+    {"name": "statement", "symbols": ["ifStatement"], "postprocess": id},
+    {"name": "statement", "symbols": ["ifElseStatement"], "postprocess": id},
+    {"name": "statement", "symbols": ["switchStatement"], "postprocess": id},
     {"name": "statement", "symbols": [(lexer.has("comment") ? {type: "comment"} : comment)], "postprocess": nuller},
     {"name": "textStatement", "symbols": ["text", "_", {"literal":";"}], "postprocess": extractTextStatement},
-    {"name": "blockStatement", "symbols": ["block"], "postprocess": extractBlockStatement},
-    {"name": "block", "symbols": ["whileBlock"], "postprocess": id},
-    {"name": "block", "symbols": ["ifBlock"], "postprocess": id},
-    {"name": "block", "symbols": ["ifElseBlock"], "postprocess": id},
-    {"name": "block", "symbols": ["switchBlock"], "postprocess": id},
-    {"name": "whileBlock", "symbols": [{"literal":"while"}, "_", {"literal":"("}, "_", "text", "_", {"literal":")"}, "_", {"literal":"{"}, "_", "statements", "_", {"literal":"}"}], "postprocess": extractWhileBlock},
-    {"name": "ifBlock", "symbols": [{"literal":"if"}, "_", {"literal":"("}, "_", "text", "_", {"literal":")"}, "_", {"literal":"{"}, "_", "statements", "_", {"literal":"}"}], "postprocess": extractIfBlock},
-    {"name": "ifElseBlock", "symbols": [{"literal":"if"}, "_", {"literal":"("}, "_", "text", "_", {"literal":")"}, "_", {"literal":"{"}, "_", "statements", "_", {"literal":"}"}, "_", {"literal":"else"}, "_", {"literal":"{"}, "_", "statements", "_", {"literal":"}"}], "postprocess": extractIfElseBlock},
-    {"name": "switchBlock", "symbols": [{"literal":"switch"}, "_", {"literal":"("}, "_", "text", "_", {"literal":")"}, "_", {"literal":"{"}, "_", "caseBlocks", "_", {"literal":"}"}], "postprocess": extractSwitchBlock},
-    {"name": "caseBlocks", "symbols": ["caseBlock"]},
-    {"name": "caseBlocks", "symbols": ["caseBlocks", "_", "caseBlock"], "postprocess": appendItem(0, 2)},
-    {"name": "caseBlock", "symbols": [{"literal":"case"}, "_", "text", "_", {"literal":":"}, "_", "statements"], "postprocess": extractCaseBlock},
+    {"name": "whileStatement", "symbols": [{"literal":"while"}, "_", {"literal":"("}, "_", "text", "_", {"literal":")"}, "_", {"literal":"{"}, "_", "statements", "_", {"literal":"}"}], "postprocess": extractWhileStatement},
+    {"name": "ifStatement", "symbols": [{"literal":"if"}, "_", {"literal":"("}, "_", "text", "_", {"literal":")"}, "_", {"literal":"{"}, "_", "statements", "_", {"literal":"}"}], "postprocess": extractIfStatement},
+    {"name": "ifElseStatement", "symbols": [{"literal":"if"}, "_", {"literal":"("}, "_", "text", "_", {"literal":")"}, "_", {"literal":"{"}, "_", "statements", "_", {"literal":"}"}, "_", {"literal":"else"}, "_", {"literal":"{"}, "_", "statements", "_", {"literal":"}"}], "postprocess": extractIfElseStatement},
+    {"name": "switchStatement", "symbols": [{"literal":"switch"}, "_", {"literal":"("}, "_", "text", "_", {"literal":")"}, "_", {"literal":"{"}, "_", "caseStatements", "_", {"literal":"}"}], "postprocess": extractSwitchStatement},
+    {"name": "caseStatements", "symbols": ["caseStatement"]},
+    {"name": "caseStatements", "symbols": ["caseStatements", "_", "caseStatement"], "postprocess": appendItem(0, 2)},
+    {"name": "caseStatement", "symbols": [{"literal":"case"}, "_", "text", "_", {"literal":":"}, "_", "statements"], "postprocess": extractCaseStatement},
     {"name": "text", "symbols": [(lexer.has("word") ? {type: "word"} : word)], "postprocess": arr => arr[0].value},
-    {"name": "text", "symbols": ["text", "_", (lexer.has("word") ? {type: "word"} : word)], "postprocess": arr => arr[0] + ' ' + arr[2].value},
+    {"name": "text", "symbols": ["text", "_", (lexer.has("word") ? {type: "word"} : word)], "postprocess": arr => arr[0] + (arr[1] || '') + arr[2].value},
     {"name": "_", "symbols": []},
-    {"name": "_", "symbols": [(lexer.has("space") ? {type: "space"} : space)], "postprocess": nuller}
+    {"name": "_", "symbols": [(lexer.has("space") ? {type: "space"} : space)], "postprocess": arr => arr[0].value}
 ]
   , ParserStart: "main"
 }

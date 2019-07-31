@@ -14,50 +14,58 @@ const lexer = moo.compile({
   word: /[^\s\(\)\{\}\:\;]+/
 })
 
+const meaningful = item => item != null
+
 const extractMain = arr => ({
   type: 'main',
-  statements: arr[1]
+  children: arr[1]
+})
+
+const extractStatements = arr => ({
+  type: 'statements',
+  children: arr.filter(meaningful)
+})
+
+const appendStatements = arr => ({
+  type: 'statements',
+  children: [...arr[0].children, arr[2]].filter(meaningful)
 })
 
 const extractTextStatement = arr => ({
   type: 'textStatement',
-  text: arr[0]
+  value: arr[0]
 })
 
-const extractBlockStatement = arr => ({
-  type: 'blockStatement',
-  block: arr[0]
+const extractBlockStatement = arr => arr[0]
+
+const extractWhileStatement = arr => ({
+  type: 'whileStatement',
+  value: arr[4],
+  children: [arr[10]]
 })
 
-const extractWhileBlock = arr => ({
-  type: 'whileBlock',
-  checkText: arr[4],
-  body: arr[10]
+const extractIfStatement = arr => ({
+  type: 'ifStatement',
+  value: arr[4],
+  children: [arr[10]]
 })
 
-const extractIfBlock = arr => ({
-  type: 'ifBlock',
-  checkText: arr[4],
-  body: arr[10]
+const extractIfElseStatement = arr => ({
+  type: 'ifElseStatement',
+  value: arr[4],
+  children: [arr[10], arr[18]]
 })
 
-const extractIfElseBlock = arr => ({
-  type: 'ifElseBlock',
-  checkText: arr[4],
-  trueBody: arr[10],
-  elseBody: arr[18]
+const extractSwitchStatement = arr => ({
+  type: 'switchStatement',
+  value: arr[4],
+  children: arr[10]
 })
 
-const extractSwitchBlock = arr => ({
-  type: 'switchBlock',
-  checkText: arr[4],
-  cases: arr[10]
-})
-
-const extractCaseBlock = arr => ({
-  type: 'caseBlock',
-  checkText: arr[2],
-  statements: arr[6]
+const extractCaseStatement = arr => ({
+  type: 'caseStatement',
+  value: arr[2],
+  children: [arr[6]]
 })
 
 const nuller = () => null
@@ -69,36 +77,32 @@ const appendItem = (listIndex, itemIndex) => arr => arr[listIndex].concat(arr[it
 
 main -> _ statements _ {% extractMain %}
 
-statements -> statement
-  | statements _ statement {% appendItem(0, 2) %}
+statements -> statement {% extractStatements %}
+  | statements _ statement {% appendStatements %}
 
 statement -> textStatement {% id %}
-  | blockStatement {% id %}
+  | whileStatement {% id %}
+  | ifStatement {% id %}
+  | ifElseStatement {% id %}
+  | switchStatement {% id %}
   | %comment {% nuller %}
 
 textStatement -> text _ ";" {% extractTextStatement %}
 
-blockStatement -> block {% extractBlockStatement %}
+whileStatement -> "while" _ "(" _ text _ ")" _ "{" _ statements _ "}" {% extractWhileStatement %}
 
-block -> whileBlock {% id %}
-  | ifBlock {% id %}
-  | ifElseBlock {% id %}
-  | switchBlock {% id %}
+ifStatement -> "if" _ "(" _ text _ ")" _ "{" _ statements _ "}" {% extractIfStatement %}
 
-whileBlock -> "while" _ "(" _ text _ ")" _ "{" _ statements _ "}" {% extractWhileBlock %}
+ifElseStatement -> "if" _ "(" _ text _ ")" _ "{" _ statements _ "}" _ "else" _ "{" _ statements _ "}" {% extractIfElseStatement %}
 
-ifBlock -> "if" _ "(" _ text _ ")" _ "{" _ statements _ "}" {% extractIfBlock %}
+switchStatement -> "switch" _ "(" _ text _ ")" _ "{" _ caseStatements _ "}" {% extractSwitchStatement %}
 
-ifElseBlock -> "if" _ "(" _ text _ ")" _ "{" _ statements _ "}" _ "else" _ "{" _ statements _ "}" {% extractIfElseBlock %}
+caseStatements -> caseStatement
+  | caseStatements _ caseStatement {% appendItem(0, 2) %}
 
-switchBlock -> "switch" _ "(" _ text _ ")" _ "{" _ caseBlocks _ "}" {% extractSwitchBlock %}
-
-caseBlocks -> caseBlock
-  | caseBlocks _ caseBlock {% appendItem(0, 2) %}
-
-caseBlock -> "case" _ text _ ":" _ statements {% extractCaseBlock %}
+caseStatement -> "case" _ text _ ":" _ statements {% extractCaseStatement %}
 
 text -> %word {% arr => arr[0].value %}
-  | text _ %word {% arr => arr[0] + ' ' + arr[2].value %}
+  | text _ %word {% arr => arr[0] + (arr[1] || '') + arr[2].value %}
 
-_ -> null | %space {% nuller %}
+_ -> null | %space {% arr => arr[0].value %}
