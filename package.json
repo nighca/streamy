@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "elm-test",
     "dev:elm": "elm-live src/main.elm --hot --no-server -- --output=elm.js",
     "dev:app": "parcel main.html",
     "dev": "npm run dev:elm & npm run dev:app"
