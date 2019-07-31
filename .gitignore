@@ -2,6 +2,8 @@
 elm-stuff
 # elm-repl generated files
 repl-temp-*
+# elm result file
+elm.js
 # javascript stuff
 node_modules
 .cache
