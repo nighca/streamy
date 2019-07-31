@@ -11,6 +11,7 @@ init : Flags -> ( Model.Model, Cmd Update.Msg )
 init flags =
   ( { script = "inited"
     , parsed = Nothing
+    , error = Nothing
     }
     , Cmd.none
   )

@@ -23,8 +23,18 @@ update msg model =
         , Ports.scriptToParse (E.string newScript)
       )
     ScriptParsed parsed ->
-      ( { model
-        | parsed = Just (Tree.extractTree parsed)
-        }
-        , Cmd.none
-      )
+      case (Debug.log "tree result" (Tree.extractTree parsed)) of
+        Err error ->
+          ( { model
+            | parsed = Nothing
+            , error = Just error
+            }
+            , Cmd.none
+          )
+        Ok tree ->
+          ( { model
+            | parsed = Just tree
+            , error = Nothing
+            }
+            , Cmd.none
+          )

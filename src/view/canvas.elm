@@ -15,7 +15,7 @@ view maybeTree =
       Html.p
         [ Attr.class "view-canvas" ]
         [ Html.text
-          ( String.fromInt
-            (List.length tree.statements)
-          )
+          (tree.type_ ++ ( String.fromInt
+            (List.length (Tree.getChildrenNodes tree.children))
+          ) ++ "children")
         ]
