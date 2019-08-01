@@ -18,7 +18,7 @@ const meaningful = item => item != null
 
 const extractMain = arr => ({
   type: 'main',
-  children: arr[1]
+  children: [arr[1]]
 })
 
 const extractStatements = arr => ({
